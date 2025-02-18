@@ -1,5 +1,6 @@
 import requests
 import os
+from textblob import TextBlob
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "d7644de59e05459ba0c5401ecea1800f")
 MEDIASTACK_API_KEY = os.getenv("MEDIASTACK_API_KEY", "eb318a29917dbcc139af022c670a09e2")
@@ -69,3 +70,15 @@ def get_all_news(keyword):
     news.extend(get_news_from_mediastack(keyword))
     news.extend(get_news_from_gnews(keyword))
     return news
+
+
+def analisis_sentimen(teks):
+    analysis = TextBlob(teks)
+    score = analysis.sentiment.polarity  # Skor antara -1 (negatif) hingga +1 (positif)
+
+    if score > 0.1:
+        return "Positif"
+    elif score < -0.1:
+        return "Negatif"
+    else:
+        return "Netral"

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from app.config import SessionLocal
 from app.models import Berita
-from app.utils import get_all_news
+from app.utils import get_all_news, analisis_sentimen
 
 app = FastAPI()
 
@@ -33,3 +33,16 @@ def ambil_berita(keyword: str, db: Session = Depends(get_db)):
     db.commit()
 
     return db.query(Berita).all()
+
+
+@app.post("/analisis_sentimen/")
+def proses_analisis_sentimen(db: Session = Depends(get_db)):
+    # Ambil berita yang belum dianalisis
+    berita_belum_analisis = db.query(Berita).filter(Berita.sentimen == "Belum dianalisis").all()
+
+    for berita in berita_belum_analisis:
+        # Analisis sentimen dari isi berita
+        berita.sentimen = analisis_sentimen(berita.isi)
+
+    db.commit()
+    return {"message": f"{len(berita_belum_analisis)} berita telah dianalisis"}
